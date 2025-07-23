@@ -19,7 +19,7 @@ class BayesianOptimizer_Auto:
         # Initialize the AxClient with a generation strategy
         gs = GenerationStrategy(
             steps=[
-                GenerationStep(model=Models.SOBOL, num_trials=16, model_kwargs={"seed": 0}),
+                GenerationStep(model=Models.SOBOL, num_trials=6, model_kwargs={"seed": 0}),
                 GenerationStep(model=Models.BOTORCH_MODULAR, num_trials=-1, model_kwargs={"botorch_acqf_class": qLogNoisyExpectedHypervolumeImprovement, "surrogate": Surrogate(botorch_model_class=SingleTaskGP)} ),
             ]
         )
