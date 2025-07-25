@@ -21,7 +21,12 @@ from botorch.acquisition.multi_objective.logei import qLogNoisyExpectedHypervolu
 from ax.models.torch.botorch_modular.surrogate import Surrogate
 from botorch.models import SingleTaskGP
 
-def initialize_ax(SOBOL_trials: int = 16) -> Client:
+from ax.api.configs import (
+    ChoiceParameterConfig,
+    RangeParameterConfig,
+)
+
+def initialize_ax(SOBOL_trials: int = 16, max_excipients: int = 12) -> Client:
     # 1) Define a custom GenerationStrategy
     gs = GenerationStrategy(
         steps=[
@@ -41,50 +46,68 @@ def initialize_ax(SOBOL_trials: int = 16) -> Client:
         ]
     )
 
-    # 2) Instantiate the Client
     client = Client()
 
-    # 3) Configure the experiment (defines the search space)
+
+    # 2) Configure experiment with binary “use” + conditional ratio
+    parameters = []
+    for name in [
+        "SL_1", "SL_2", "SL_3",
+        "LL_1", "LL_2", "LL_3",
+        "P_1",  "P_2",  "P_3",
+        "S_1",  "S_2",  "S_3",
+        "Water",
+    ]:
+        # binary flag
+        parameters.append(
+            ChoiceParameterConfig(
+                name=f"use_{name}",
+                parameter_type="choice",
+                values=[0, 1],
+            )
+        )
+        # ratio, only if used
+        parameters.append(
+            RangeParameterConfig(
+                name=name,
+                parameter_type="float",
+                bounds=(0.0, 1.0),
+                # condition: name only active when use_name == 1
+                conditions=[{"use_{}".format(name): 1}],
+            )
+        )
+
     client.configure_experiment(
-        parameters=[
-            RangeParameterConfig(name="Drug_MW", parameter_type="float", bounds=(0.0, 1.0)),
-            RangeParameterConfig(name="Drug_LogP", parameter_type="float", bounds=(0.0, 1.0)),
-            RangeParameterConfig(name="Drug_TPSA", parameter_type="float", bounds=(0.0, 1.0)),
-            RangeParameterConfig(name="Drug", parameter_type="float", bounds=(0.0, 1.0)),
-            RangeParameterConfig(name="SL_1", parameter_type="float", bounds=(0.0, 1.0)),
-            RangeParameterConfig(name="SL_2", parameter_type="float", bounds=(0.0, 1.0)),
-            RangeParameterConfig(name="SL_3", parameter_type="float", bounds=(0.0, 1.0)),
-            RangeParameterConfig(name="LL_1", parameter_type="float", bounds=(0.0, 1.0)),
-            RangeParameterConfig(name="LL_2", parameter_type="float", bounds=(0.0, 1.0)),
-            RangeParameterConfig(name="LL_3", parameter_type="float", bounds=(0.0, 1.0)),
-            RangeParameterConfig(name="P_1", parameter_type="float", bounds=(0.0, 1.0)),
-            RangeParameterConfig(name="P_2", parameter_type="float", bounds=(0.0, 1.0)),
-            RangeParameterConfig(name="P_3", parameter_type="float", bounds=(0.0, 1.0)),
-            RangeParameterConfig(name="S_1", parameter_type="float", bounds=(0.0, 1.0)),
-            RangeParameterConfig(name="S_2", parameter_type="float", bounds=(0.0, 1.0)),
-            RangeParameterConfig(name="S_3", parameter_type="float", bounds=(0.0, 1.0)),
-            RangeParameterConfig(name="Water", parameter_type="float", bounds=(0.0, 1.0)),
-        ]
+        parameters=parameters,
+        parameter_constraints=[
+            # sum of all use_* flags ≤ max_excipients
+            " + ".join(f"use_{n}" for n in [
+                "SL_1","SL_2","SL_3",
+                "LL_1","LL_2","LL_3",
+                "P_1", "P_2", "P_3",
+                "S_1", "S_2", "S_3",
+                "Water",
+            ]) + f" <= {max_excipients}"
+        ],
     )
 
-    # 4) Attach the GenerationStrategy now that the experiment exists
+    # 3) Attach your GS  
     client.set_generation_strategy(gs)
 
-    # 5) Register metrics (tracking and objectives)
+    # 4) Only register the *actual* metrics you care to optimize
     client.configure_metrics(
         metrics=[
             IMetric(name="Solu"),
             IMetric(name="Size"),
             IMetric(name="PDI"),
-            IMetric(name="Complexity"),
         ]
-    )  # :contentReference[oaicite:0]{index=0}
+    )
 
-    # 6) Define the optimization objective(s) and outcome constraint(s)
+    # 5) Multi‑objective optimize just those three
     client.configure_optimization(
         objective="Solu, -Size, -PDI",
-        outcome_constraints=["Complexity <= 12"],
-    )  # :contentReference[oaicite:1]{index=1}
+        # no outcome_constraints at all
+    )
 
     return client
 
@@ -143,8 +166,8 @@ def virtual_experiment(df): # only for testing purposes
     out['Complexity'] = out[columns_to_check].apply(lambda row: (row != 0).sum(), axis=1)
 
 
-    out['Complexity'] = out['Complexity'].values
-    out['Complexity_STD'] = 0
+    # out['Complexity'] = out['Complexity'].values
+    # out['Complexity_STD'] = 0
 
     return out
     
