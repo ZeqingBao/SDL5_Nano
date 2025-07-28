@@ -78,13 +78,13 @@ def initialize_ax(SOBOL_trials: int = 16) -> Client:
             IMetric(name="PDI"),
             IMetric(name="Complexity"),
         ]
-    )  # :contentReference[oaicite:0]{index=0}
+    ) 
 
     # 6) Define the optimization objective(s) and outcome constraint(s)
     client.configure_optimization(
         objective="Solu, -Size, -PDI",
         outcome_constraints=["Complexity <= 12"],
-    )  # :contentReference[oaicite:1]{index=1}
+    ) 
 
     return client
 
