@@ -4,26 +4,49 @@ import pandas as pd
 import numpy as np
 from ax.service.ax_client import AxClient, ObjectiveProperties
 from ax.modelbridge.generation_strategy import GenerationStep, GenerationStrategy
-from ax.modelbridge.factory import Models
+from ax.modelbridge.factory import Generators as Models
 from ax.core.observation import ObservationFeatures
 from ax.models.torch.botorch_modular.surrogate import Surrogate
 from botorch.models.gp_regression import SingleTaskGP
 from botorch.acquisition.multi_objective.logei import qLogNoisyExpectedHypervolumeImprovement
-
+from ax.models.torch.botorch_modular.sebo import SEBOAcquisition
+import torch
 
 
 
 def initialize_ax(SOBOL_trials=16):
     # Initialize the AxClient with a generation strategy
+    # gs = GenerationStrategy(
+    #     steps=[
+    #         GenerationStep(model=Models.SOBOL, num_trials=SOBOL_trials, model_kwargs={"seed": 0}),
+    #         GenerationStep(model=Models.BOTORCH_MODULAR, 
+    #                        num_trials=-1, 
+    #                        model_kwargs={"botorch_acqf_class": qLogNoisyExpectedHypervolumeImprovement, 
+    #                                      "surrogate": Surrogate(botorch_model_class=SingleTaskGP)} ),
+    #     ]
+    # )
+
     gs = GenerationStrategy(
+        name="nanosdl",
         steps=[
             GenerationStep(model=Models.SOBOL, num_trials=SOBOL_trials, model_kwargs={"seed": 0}),
-            GenerationStep(model=Models.BOTORCH_MODULAR, 
-                           num_trials=-1, 
-                           model_kwargs={"botorch_acqf_class": qLogNoisyExpectedHypervolumeImprovement, 
-                                         "surrogate": Surrogate(botorch_model_class=SingleTaskGP)} ),
+            GenerationStep(
+                model=Models.BOTORCH_MODULAR,
+                num_trials=-1,
+                model_kwargs={
+                    "surrogate": Surrogate(botorch_model_class=SingleTaskGP),
+                    "acquisition_class": SEBOAcquisition,
+                    "botorch_acqf_class": qLogNoisyExpectedHypervolumeImprovement,
+                    "acquisition_options": {
+                        "penalty": "L0_norm",
+                        "target_point": torch.zeros(14, dtype=torch.double),      
+                        "sparsity_threshold": 6,      
+                    },
+                },
+            )
         ]
     )
+
     ax_client = AxClient(generation_strategy=gs)
 
     # Set the design space for optimization
@@ -31,33 +54,31 @@ def initialize_ax(SOBOL_trials=16):
         name="sdlnano",
         parameters=[
 
-            # Drug_MW [0, 1000] ~ [0.0,1,0]
-            {"name": "Drug_MW", "type": "range", "bounds": [0.0, 1.0], "value_type": "float"},
+            # # Drug_MW [0, 1000] ~ [0.0,1,0]
+            # {"name": "Drug_MW", "type": "range", "bounds": [0.0, 1.0], "value_type": "float"},
+            # # Drug_LogP [0, 10] ~ [0.0,1,0]
+            # {"name": "Drug_LogP", "type": "range", "bounds": [0.0, 1.0], "value_type": "float"},
+            # # Drug_TPSA [0, 1000] ~ [0.0,1,0]
+            # {"name": "Drug_TPSA", "type": "range", "bounds": [0.0, 1.0], "value_type": "float"},
 
-            # Drug_LogP [0, 10] ~ [0.0,1,0]
-            {"name": "Drug_LogP", "type": "range", "bounds": [0.0, 1.0], "value_type": "float"},
+            {"name": "Drug", "type": "range", "bounds": [1, 100], "value_type": "int"},
 
-            # Drug_TPSA [0, 1000] ~ [0.0,1,0]
-            {"name": "Drug_TPSA", "type": "range", "bounds": [0.0, 1.0], "value_type": "float"},
+            {"name": "SL_1", "type": "range", "bounds": [0, 100], "value_type": "int"},
+            {"name": "SL_2", "type": "range", "bounds": [0, 100], "value_type": "int"},
+            {"name": "SL_3", "type": "range", "bounds": [0, 100], "value_type": "int"},
 
-            {"name": "Drug", "type": "range", "bounds": [0.0, 1.0], "value_type": "float"},
+            {"name": "LL_1", "type": "range", "bounds": [0, 100], "value_type": "int"},
+            {"name": "LL_2", "type": "range", "bounds": [0, 100], "value_type": "int"},
+            {"name": "LL_3", "type": "range", "bounds": [0, 100], "value_type": "int"},
 
-            {"name": "SL_1", "type": "range", "bounds": [0.0, 1.0], "value_type": "float"},
-            {"name": "SL_2", "type": "range", "bounds": [0.0, 1.0], "value_type": "float"},
-            {"name": "SL_3", "type": "range", "bounds": [0.0, 1.0], "value_type": "float"},
+            {"name": "P_1", "type": "range", "bounds": [0, 100], "value_type": "int"},
+            {"name": "P_2", "type": "range", "bounds": [0, 100], "value_type": "int"},
+            {"name": "P_3", "type": "range", "bounds": [0, 100], "value_type": "int"},
 
-            {"name": "LL_1", "type": "range", "bounds": [0.0, 1.0], "value_type": "float"},
-            {"name": "LL_2", "type": "range", "bounds": [0.0, 1.0], "value_type": "float"},
-            {"name": "LL_3", "type": "range", "bounds": [0.0, 1.0], "value_type": "float"},
-
-            {"name": "P_1", "type": "range", "bounds": [0.0, 1.0], "value_type": "float"},
-            {"name": "P_2", "type": "range", "bounds": [0.0, 1.0], "value_type": "float"},
-            {"name": "P_3", "type": "range", "bounds": [0.0, 1.0], "value_type": "float"},
-
-            {"name": "S_1", "type": "range", "bounds": [0.0, 1.0], "value_type": "float"},
-            {"name": "S_2", "type": "range", "bounds": [0.0, 1.0], "value_type": "float"},
-            {"name": "S_3", "type": "range", "bounds": [0.0, 1.0], "value_type": "float"},
-            {"name": "Water", "type": "range", "bounds": [0.0, 1.0], "value_type": "float"},
+            {"name": "S_1", "type": "range", "bounds": [0, 100], "value_type": "int"},
+            {"name": "S_2", "type": "range", "bounds": [0, 100], "value_type": "int"},
+            {"name": "S_3", "type": "range", "bounds": [0, 100], "value_type": "int"},
+            {"name": "Water", "type": "range", "bounds": [0, 100], "value_type": "int"},
 
         ],
         # Set the objective metrics for optimization
@@ -65,9 +86,13 @@ def initialize_ax(SOBOL_trials=16):
 
             "Solu": ObjectiveProperties(minimize=False),
             "Size": ObjectiveProperties(minimize=True),
-            "Complexity": ObjectiveProperties(minimize=True),
             "PDI": ObjectiveProperties(minimize=True),
         },
+
+        parameter_constraints=[
+                'SL_1 + SL_2 + SL_3 + LL_1 + LL_2 + LL_3 + P_1 + P_2 + P_3 >= 1',
+                'S_1 + S_2 + S_3 + Water >= 1',
+            ],
 
     )
     return ax_client
@@ -77,25 +102,25 @@ def virtual_experiment(df): # only for testing purposes
     # Define weights for each feature per objective
     weights = {
         'Solu': {
-            'SL_1':  0.30, 'SL_2': -0.0, 'SL_3':  0.10,
+            'SL_1':  0.30, 'SL_2': -0.2, 'SL_3':  0.10,
             'LL_1':  0.0, 'LL_2': -0.05, 'LL_3':  0.00,
             'P_1':   0.10, 'P_2': -0.10, 'P_3':  0.00,
-            'S_1':   0.0, 'S_2':  0.0, 'S_3': -0.0,
+            'S_1':   0.0, 'S_2':  0.5, 'S_3': -0.0,
             'Water': 0.20
         },
         'Size': {
-            'SL_1': -0.0, 'SL_2':  0.20, 'SL_3':  0.0,
+            'SL_1': -0.0, 'SL_2':  0.20, 'SL_3':  0.2,
             'LL_1':  0.30, 'LL_2': -0.0, 'LL_3':  0.0,
             'P_1':   0.0, 'P_2':  0.10, 'P_3': -0.10,
             'S_1':   0.00, 'S_2':  0.05, 'S_3':  0.10,
             'Water': 0.15
         },
         'PDI': {
-            'SL_1':  0.05, 'SL_2':  0.05, 'SL_3': -0.0,
+            'SL_1':  0.05, 'SL_2':  0.25, 'SL_3': -0.3,
             'LL_1':  0.10, 'LL_2':  0.10, 'LL_3': -0.0,
-            'P_1':   0.0, 'P_2': -0.0, 'P_3':  0.20,
-            'S_1':  -0.0, 'S_2':  0.10, 'S_3':  0.05,
-            'Water': -0.0
+            'P_1':   0.4, 'P_2': -0.0, 'P_3':  0.20,
+            'S_1':  -0.25, 'S_2':  0.10, 'S_3':  0.05,
+            'Water': -0.3
         }
     }
     
@@ -140,7 +165,8 @@ def generate_trials(ax_client, num_of_trials, drug, bopt=1):
         drug_features = ObservationFeatures(parameters = {"Drug_MW": 0.354, "Drug_LogP": 0.391,  "Drug_TPSA": 0.067})
 
     # Get the trials data
-    trials, _ = ax_client.get_next_trials(max_trials=num_of_trials, fixed_features=drug_features)
+#    trials, _ = ax_client.get_next_trials(max_trials=num_of_trials, fixed_features=drug_features)
+    trials, _ = ax_client.get_next_trials(max_trials=num_of_trials)
 
     # Prepare the trial data for DataFrame
     trials_data = []
@@ -155,8 +181,8 @@ def generate_trials(ax_client, num_of_trials, drug, bopt=1):
                 "Size_STD": None,
                 "PDI": None,
                 "PDI_STD": None,                  
-                "Complexity": None,
-                "Complexity_STD": None,
+                # "Complexity": None,
+                # "Complexity_STD": None,
             }
         )
     return pd.DataFrame(trials_data), ax_client
@@ -177,9 +203,9 @@ def process_trails(data):
         df[col] = df[col].div(sums, axis=0).round(3)
 
 
-    df['Drug_MW'] = df['Drug_MW'] * 1000
-    df['Drug_LogP'] = df['Drug_LogP'] * 10
-    df['Drug_TPSA'] = df['Drug_TPSA'] * 1000
+    # df['Drug_MW'] = df['Drug_MW'] * 1000
+    # df['Drug_LogP'] = df['Drug_LogP'] * 10
+    # df['Drug_TPSA'] = df['Drug_TPSA'] * 1000
 
     return df
 
@@ -193,7 +219,7 @@ def load_labeled_data(ax_client, labeled_data_path):
             "Solu": (row["Solu"], row["Solu_STD"]),
             "Size": (row["Size"], row["Size_STD"]),
             "PDI": (row["PDI"], row["PDI_STD"]),
-            "Complexity": (row["Complexity"], row["Complexity_STD"]),
+#            "Complexity": (row["Complexity"], row["Complexity_STD"]),
         }
         
         ax_client.complete_trial(trial_index=trial_index, raw_data=raw_data)

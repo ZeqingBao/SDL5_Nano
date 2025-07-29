@@ -107,7 +107,7 @@ def converter(dataset):
     return transfer_df
 
 # Write the transfer volume to OT2 protocols
-def update_transfer_script(script_path, excel_data_path, output_path):
+def update_transfer_script(script_path, excel_data_path, output_path_part1, output_path_part2):
     # Read the script
     with open(script_path, 'r') as file:
         script_lines = file.readlines()
@@ -142,17 +142,38 @@ def update_transfer_script(script_path, excel_data_path, output_path):
 
 
 
-    with open(output_path, 'w', encoding='utf-8') as file:
-        for line in updated_lines:
-                file.write(line)
+    def apply_comments(lines, identifiers):
+        out = []
+        for ln in lines:
+            if any(idf in ln for idf in identifiers) and not ln.lstrip().startswith('#'):
+                out.append('# ' + ln)
+            else:
+                out.append(ln)
+        return out
 
-    with open(output_path, 'r', encoding='utf-8') as file:
-        content = file.read()
-    content = content.lstrip('\ufeff')
-    with open(output_path, 'w', encoding='utf-8') as file:
-        file.write(content)
+    # Part 1: comment out steps 2 & 3
+    part1_ids = [
+        '# Step 2:', 'Decap Loc4: A1/A2/A3', "aqueous_organic_phase_prep ('organic')",
+        '# Step 3:', 'formulation ()', "transfer_for_loading_size ('size')"
+    ]
+    part1_lines = apply_comments(updated_lines, part1_ids)
 
-    return output_path
+    # Part 2: comment out step 1
+    part2_ids = ['# Step 1:', 'Decap Loc4: B1/B2/B3', "aqueous_organic_phase_prep ('aqueous')"]
+    part2_lines = apply_comments(updated_lines, part2_ids)
+
+    # Write both outputs
+    for lines, path in [(part1_lines, output_path_part1), (part2_lines, output_path_part2)]:
+        with open(path, 'w', encoding='utf-8') as f:
+            f.writelines(lines)
+        # Strip BOM if present
+        with open(path, 'r+', encoding='utf-8') as f:
+            content = f.read().lstrip('\ufeff')
+            f.seek(0)
+            f.write(content)
+            f.truncate()
+
+    return output_path_part1, output_path_part2
 
 # Obtain the formulation parameters and formulation complexity
 

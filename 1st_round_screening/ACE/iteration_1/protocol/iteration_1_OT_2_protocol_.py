@@ -26,7 +26,7 @@ def run(protocol: protocol_api.ProtocolContext):
     p300.flow_rate.blow_out = 500
     p300_8.flow_rate.blow_out = 500
 
-
+    # Set up pipette aspirating and dispensing position 
     safe_transfer_vol = 100
     surfactant_safe_transfer_vol = 150
     NP_aqueous_vol = 270
@@ -43,9 +43,11 @@ def run(protocol: protocol_api.ProtocolContext):
     water_res = protocol.load_labware('nest_1_reservoir_290ml','6')
 #    drug_extaction_solvent_res = protocol.load_labware('nest_1_reservoir_290ml','7')
 
+    # Define organic/aqueous components
     organic_components = ['Drug', 'SL_1', 'SL_2', 'SL_3', 'LL_1', 'LL_2', 'LL_3', 'P_1', 'P_2', 'P_3']
     aqueous_components = ['S_1', 'S_2', 'S_3', 'Water']
 
+    # Define the stock solution loacations
     SL_1_loc = lipid_drug_stock['A1']
     SL_2_loc = lipid_drug_stock['A2']
     SL_3_loc = lipid_drug_stock['A3']
@@ -66,25 +68,25 @@ def run(protocol: protocol_api.ProtocolContext):
     
 #    Solvent_loc = drug_extaction_solvent_res['A1']
 
+    # Transfer volumes for each component (place holder)
+    Drug_transfer = [93.1, 134.4, 72.45, 124.6, 143.5, 245.0, 35.35, 147.7, 122.5, 208.25, 100.45, 35.0, 99.4, 91.7, 171.5, 220.85]
+    SL_1_transfer = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    SL_2_transfer = [0.0, 0.0, 11.2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    SL_3_transfer = [0.0, 0.0, 11.2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 16.8, 0.0, 0.0, 0.0, 0.0, 34.3, 0.0]
 
-    Drug_transfer = [47.25, 85.05, 65.45, 0.0, 84.7, 48.65, 43.4, 83.65, 73.15, 84.7, 50.4, 40.95, 74.2, 113.4, 57.75, 15.05]
-    SL_1_transfer = [0.0, 0.0, 40.95, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 50.4, 0.0, 0.0, 57.75, 0.0]
-    SL_2_transfer = [0.0, 65.45, 0.0, 0.0, 84.7, 78.4, 112.35, 0.0, 73.15, 24.85, 108.85, 50.4, 0.0, 67.9, 57.75, 0.0]
-    SL_3_transfer = [7.0, 10.15, 6.65, 0.0, 8.4, 6.3, 5.25, 5.6, 11.55, 7.35, 3.85, 1.4, 16.8, 0.0, 26.25, 7.0]
+    LL_1_transfer = [0.0, 0.0, 19.95, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 21.0, 29.75, 23.1, 0.0, 0.0, 0.0]
+    LL_2_transfer = [64.05, 91.0, 40.6, 95.2, 113.4, 105.0, 77.35, 0.0, 0.0, 0.0, 46.2, 63.7, 35.35, 112.35, 0.0, 0.0]
+    LL_3_transfer = [98.7, 0.0, 71.4, 130.2, 93.1, 0.0, 110.25, 0.0, 227.5, 124.95, 81.55, 99.75, 87.15, 0.0, 144.2, 0.0]
 
-    LL_1_transfer = [11.2, 14.7, 11.2, 4.9, 11.9, 12.6, 6.3, 10.15, 11.55, 16.45, 4.55, 11.55, 20.3, 17.15, 34.65, 18.9]
-    LL_2_transfer = [32.55, 51.8, 41.65, 0.0, 84.7, 46.9, 78.75, 83.65, 44.45, 112.35, 57.05, 43.4, 31.15, 113.4, 57.75, 39.2]
-    LL_3_transfer = [78.75, 88.9, 65.45, 86.1, 75.95, 78.4, 103.6, 74.2, 73.15, 78.4, 108.85, 50.4, 93.1, 38.15, 57.75, 32.2]
+    P_1_transfer = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    P_2_transfer = [66.5, 124.6, 86.1, 0.0, 0.0, 0.0, 126.7, 0.0, 0.0, 0.0, 100.45, 58.8, 0.0, 145.95, 0.0, 129.15]
+    P_3_transfer = [27.65, 0.0, 37.1, 0.0, 0.0, 0.0, 0.0, 202.3, 0.0, 0.0, 0.0, 62.65, 105.0, 0.0, 0.0, 0.0]
 
-    P_1_transfer = [16.1, 0.0, 0.0, 86.1, 0.0, 78.4, 0.0, 0.0, 0.0, 0.0, 16.45, 50.4, 0.0, 0.0, 0.0, 53.2]
-    P_2_transfer = [78.75, 34.3, 65.45, 86.1, 0.0, 0.0, 0.0, 9.1, 63.35, 0.0, 0.0, 50.4, 21.7, 0.0, 0.0, 92.05]
-    P_3_transfer = [78.75, 0.0, 53.9, 86.1, 0.0, 0.0, 0.0, 83.65, 0.0, 25.9, 0.0, 0.0, 93.1, 0.0, 0.0, 92.05]
+    S_1_transfer = [516.0, 477.0, 0.0, 546.0, 303.0, 0.0, 1000.0, 0.0, 0.0, 0.0, 777.0, 1000.0, 490.0, 0.0, 422.0]
+    S_2_transfer = [310.0, 270.0, 0.0, 311.0, 697.0, 1000.0, 0.0, 0.0, 448.0, 540.0, 0.0, 0.0, 510.0, 1000.0, 232.0]
+    S_3_transfer = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
-    S_1_transfer = [741, 333, 683, 400, 132, 500, 0, 333, 0, 359, 511, 500, 913, 0, 0, 972]
-    S_2_transfer = [49, 183, 153, 201, 434, 0, 435, 333, 459, 319, 81, 0, 0, 352, 500, 0]
-    S_3_transfer = [210, 0, 40, 400, 0, 0, 59, 333, 0, 0, 191, 0, 0, 296, 0, 28]
-
-    Water_transfer = [0, 484, 124, 0, 434, 500, 507, 0, 541, 323, 217, 500, 87, 352, 500, 0]
+    Water_transfer = [174.0, 253.0, 1000.0, 142.0, 0.0, 0.0, 0.0, 0.0, 552.0, 460.0, 223.0, 0.0, 0.0, 0.0, 346.0]
 
 
     component_data = {
@@ -122,7 +124,7 @@ def run(protocol: protocol_api.ProtocolContext):
 
 
         
-
+    # matrix transfer
     def matrix(pipette, stock, destination, volume, start_column, aqueous_or_organic= 'organic', rows=8, columns=2):
         letters = ['A','B','C','D','E','F','G','H']
         numbers = ['1','2','3','4','5','6','7','8','9','10','11','12']
@@ -150,6 +152,7 @@ def run(protocol: protocol_api.ProtocolContext):
         if (aqueous_or_organic == 'organic'):
             pipette.drop_tip()
 
+    # Aqueous/Organic phase preparation
     def aqueous_organic_phase_prep (aqueous_or_organic):
 
         # Position of pipette aspirating and dispensing position (distance (mm) above the labware bottom)
@@ -221,6 +224,7 @@ def run(protocol: protocol_api.ProtocolContext):
                 p300_8.drop_tip()
 
 
+    # Transfer for loading size measurement
     def transfer_for_loading_size(type):
 
         # Position of pipette aspirating and dispensing position (distance (mm) above the labware bottom)  
