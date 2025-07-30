@@ -60,11 +60,12 @@ def run(protocol: protocol_api.ProtocolContext):
     P_1_loc = polymer_aqueous_stock['A1']    
     P_2_loc = polymer_aqueous_stock['A2']
     P_3_loc = polymer_aqueous_stock['A3']
-    Water_loc = water_res['A1']
+    
 
     S_1_loc = polymer_aqueous_stock['B1']    
     S_2_loc = polymer_aqueous_stock['B2']
     S_3_loc = polymer_aqueous_stock['B3']
+    Water_loc = water_res['A1']
     
 #    Solvent_loc = drug_extaction_solvent_res['A1']
 
