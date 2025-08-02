@@ -10,8 +10,8 @@ metadata = {
 def run(protocol: protocol_api.ProtocolContext):
 
     # Set up pipette tips (this should be done before setting up pipettes)
-    p300t_1 = protocol.load_labware('opentrons_96_filtertiprack_200ul','9')
-    p300t_2 = protocol.load_labware('opentrons_96_filtertiprack_200ul','10')
+    p300t_1 = protocol.load_labware('opentrons_96_filtertiprack_200ul','10')
+    p300t_2 = protocol.load_labware('opentrons_96_filtertiprack_200ul','11')
 #    p300t_3 = protocol.load_labware('opentrons_96_filtertiprack_200ul','11')
     
     # Set up Pipettes
@@ -34,13 +34,13 @@ def run(protocol: protocol_api.ProtocolContext):
     mixing_vol = 50
     
     # Set up Labwares
-    lipid_drug_stock = protocol.load_labware('allenlab_8_wellplate_20000ul', '1')
-    polymer_aqueous_stock = protocol.load_labware('allenlab_8_wellplate_20000ul', '4')
+    lipid_drug_stock = protocol.load_labware('allenlab_8_wellplate_20000ul', '4')
+    polymer_aqueous_stock = protocol.load_labware('allenlab_8_wellplate_20000ul', '8')
     stock_solution_mix = protocol.load_labware('allenlabresevoir_96_wellplate_2200ul','5')
 #    loading_plate = protocol.load_labware('agilent_96_wellplate_500ul','6')
-    size_plate = protocol.load_labware('corning_96_wellplate_360ul_flat','3')
+    size_plate = protocol.load_labware('corning_96_wellplate_360ul_flat','1')
     LNP = protocol.load_labware('corning_96_wellplate_360ul_flat','2')
-    water_res = protocol.load_labware('nest_1_reservoir_290ml','6')
+    water_res = protocol.load_labware('nest_1_reservoir_290ml','7')
 #    drug_extaction_solvent_res = protocol.load_labware('nest_1_reservoir_290ml','7')
 
     # Define organic/aqueous components

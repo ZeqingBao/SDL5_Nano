@@ -159,7 +159,7 @@ def update_transfer_script(script_path, excel_data_path, output_path_part1, outp
     part1_lines = apply_comments(updated_lines, part1_ids)
 
     # Part 2: comment out step 1
-    part2_ids = ['# Step 1:', 'Decap Loc4: B1/B2/B3/B4', "aqueous_organic_phase_prep ('aqueous')"]
+    part2_ids = ['# Step 1:', 'Decap Loc4: B1/B2/B3', "aqueous_organic_phase_prep ('aqueous')"]
     part2_lines = apply_comments(updated_lines, part2_ids)
 
     # Write both outputs
