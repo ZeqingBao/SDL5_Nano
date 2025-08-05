@@ -15,8 +15,8 @@ def run(protocol: protocol_api.ProtocolContext):
 #    p300t_3 = protocol.load_labware('opentrons_96_filtertiprack_200ul','11')
     
     # Set up Pipettes
-    p300 = protocol.load_instrument ('p300_single_gen2', 'right',tip_racks=[p300t_1,p300t_2]) 
-    p300_8 = protocol.load_instrument ('p300_multi_gen2', 'left',tip_racks=[p300t_1,p300t_2])
+    p300 = protocol.load_instrument ('p300_single_gen2', 'left',tip_racks=[p300t_1,p300t_2]) 
+    p300_8 = protocol.load_instrument ('p300_multi_gen2', 'right',tip_racks=[p300t_1,p300t_2])
 
     # Set up pipette aspirating and dispensing flow rate
     p300.flow_rate.aspirate = 277.4
@@ -265,11 +265,11 @@ def run(protocol: protocol_api.ProtocolContext):
 
 
     # Step 1: ~30 min
-    protocol.pause("Decap Loc4: B1/B2/B3")
+#    protocol.pause("Decap Loc4: B1/B2/B3")
     aqueous_organic_phase_prep ('aqueous')
 
     # Step 2: ~16 min
-    protocol.pause("Decap Loc4: A1/A2/A3; Loc1: ALL")
+#    protocol.pause("Decap Loc4: A1/A2/A3; Loc1: ALL")
     aqueous_organic_phase_prep ('organic')
 
     # Step 3: ~10 min

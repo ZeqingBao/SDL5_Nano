@@ -15,8 +15,8 @@ def run(protocol: protocol_api.ProtocolContext):
 #    p300t_3 = protocol.load_labware('opentrons_96_filtertiprack_200ul','11')
     
     # Set up Pipettes
-    p300 = protocol.load_instrument ('p300_single_gen2', 'right',tip_racks=[p300t_1,p300t_2]) 
-    p300_8 = protocol.load_instrument ('p300_multi_gen2', 'left',tip_racks=[p300t_1,p300t_2])
+    p300 = protocol.load_instrument ('p300_single_gen2', 'left',tip_racks=[p300t_1,p300t_2]) 
+    p300_8 = protocol.load_instrument ('p300_multi_gen2', 'right',tip_racks=[p300t_1,p300t_2])
 
     # Set up pipette aspirating and dispensing flow rate
     p300.flow_rate.aspirate = 277.4
